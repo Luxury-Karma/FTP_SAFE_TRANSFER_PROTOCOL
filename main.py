@@ -7,16 +7,18 @@ import subprocess
 
 
 
-def find_all_files(start_path: str) -> list[list[str]]:
+def find_all_files(start_path: str) -> list[tuple[str, list[str], list[str]]]:
     """
     :param start_path: path where we need to start to look at
-    :return : a array of list where in each list the 0 is the root directory, 1 are all the child directory and 2 are all the files
+    :return : a list of 3-tuples where the first item is the root directory,
+              the second item is all the child directories, and the third item is all the files
     """
-    dirs, files = os.walk(start_path)
-    return [dirs, files]
+    result = []
+    for dirs, subdirs, files in os.walk(start_path):
+        result.append((dirs, subdirs, files))
+    return result
 
 
-import subprocess
 
 def open_powershell() -> subprocess.Popen:
     """
@@ -55,8 +57,16 @@ def close_powershell(process: subprocess.Popen):
 
 def main():
     ps_process = open_powershell()  # Start the PowerShell to send the data
-    send_powershell_command(ps_process, 'ls')
-    files = find_all_files('D:\\dnd')
+
+    data = find_all_files('D:\\dnd')
+    for dirs, subdirs, files in data:
+        for subdir in subdirs:
+            subdir_path = os.path.join(dirs, subdir)
+            send_powershell_command(ps_process, f'mkdir {subdir_path}')
+        for file in files:
+            file_path = os.path.join(dirs, file)
+            send_powershell_command(ps_process, f'mput {file_path}')
+
 
 
 
