@@ -55,17 +55,28 @@ def close_powershell(process: subprocess.Popen):
     process.communicate()  # Wait for PowerShell to exit and clean up
 
 
-def main():
-    ps_process = open_powershell()  # Start the PowerShell to send the data
-
-    data = find_all_files('D:\\dnd')
+# Create Directory
+def push_directory(data, ps_process, linux_dir: str):
+    #send_powershell_command(f'cd {linux_dir}')
     for dirs, subdirs, files in data:
         for subdir in subdirs:
-            subdir_path = os.path.join(dirs, subdir)
-            send_powershell_command(ps_process, f'mkdir {subdir_path}')
+            send_powershell_command(ps_process, f'mkdir {subdir}')
         for file in files:
             file_path = os.path.join(dirs, file)
+            send_powershell_command(ps_process, f'lcd {}')
             send_powershell_command(ps_process, f'mput {file_path}')
+
+
+
+
+def main(moving_directory: str):
+
+    ps_process = open_powershell()  # Start the PowerShell to send the data
+    data = find_all_files(moving_directory)
+    linux_dir = moving_directory.split('\\')
+    linux_dir = linux_dir[len(linux_dir)-1]
+    push_directory(data, ps_process, linux_dir)
+
 
 
 
@@ -75,6 +86,6 @@ def main():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    main()
+    main('D:\\dnd')
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
